@@ -38,7 +38,7 @@ func main() {
 	}
 	log.SetFormatter(Formatter)
 	c := cron.New()
-	_, _ = c.AddFunc("*/15 * * * *", scheduler)
+	_, _ = c.AddFunc("*/5 * * * *", scheduler)
 	c.Start()
 	//  toilet  KeepMe.Run -f smblock
 	banner := fmt.Sprintf(`
