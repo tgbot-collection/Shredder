@@ -111,23 +111,33 @@ func settingsHandler(m *tb.Message) {
 }
 
 func permissionCheck(m *tb.Message) bool {
-	var canSubscribe = false
+	var isAdmin = false
+	var senderAdmin = false
 	if m.Chat.Type == "channel" {
-		canSubscribe = true
+		isAdmin = true
+		senderAdmin = true
 	} else {
 		admins, _ := b.AdminsOf(m.Chat)
+
 		for _, admin := range admins {
-			if admin.User.ID == m.Sender.ID {
-				canSubscribe = true
+			switch admin.User.ID {
+			case m.Sender.ID:
+				senderAdmin = true
+			case b.Me.ID:
+				isAdmin = true
+			default:
+				isAdmin = false
+				senderAdmin = false
 			}
+
 		}
 	}
 	//log.Infof("User %d on %s  permission is %v", m.Chat.ID, m.Chat.Type, canSubscribe)
 
-	if !canSubscribe {
+	if !(isAdmin && senderAdmin) {
 		// log.Warnf("Denied subscribe request for: %d", m.Sender.ID)
 		_ = b.Notify(m.Chat, tb.Typing)
-		_, _ = b.Send(m.Chat, "Only admin could access this function")
+		_, _ = b.Send(m.Chat, "Are you admin? Please promote me as admin.")
 		return false
 	}
 	return true
