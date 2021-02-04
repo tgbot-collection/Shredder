@@ -23,6 +23,10 @@ func scheduler() {
 			intcid, _ := strconv.Atoi(g)
 			data := readJSON()
 			v := data[g]
+			if v == 0 {
+				log.Warningln("this group hasn't set TTL yet")
+				return
+			}
 			if time.Now().Unix()-int64(intts) > v {
 				log.Debugln("Deleting...")
 				var msg tb.StoredMessage
