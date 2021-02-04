@@ -6,6 +6,7 @@ package main
 
 import "os"
 
-var Token = os.Getenv("TOKEN")
+var token = os.Getenv("TOKEN")
+var redisHost = os.Getenv("REDIS")
 
 type userConfig map[string]int64

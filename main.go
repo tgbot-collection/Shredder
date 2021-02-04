@@ -17,7 +17,7 @@ import (
 )
 
 var b, err = tb.NewBot(tb.Settings{
-	Token:  Token,
+	Token:  token,
 	Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 })
 
