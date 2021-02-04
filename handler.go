@@ -27,6 +27,9 @@ var rdb = redis.NewClient(&redis.Options{
 
 func messageHandler(m *tb.Message) {
 	if m.ReplyTo.Text == "Choose your time-to-live:" {
+		if !permissionCheck(m) {
+			return
+		}
 		data := readJSON()
 		re := regexp.MustCompile(`\d+`)
 		result := re.FindAllString(m.Text, -1)[0]
