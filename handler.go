@@ -26,7 +26,7 @@ var rdb = redis.NewClient(&redis.Options{
 })
 
 func messageHandler(m *tb.Message) {
-	if m.ReplyTo.Text == "Choose your time-to-live:" {
+	if m.ReplyTo != nil && m.ReplyTo.Text == "Choose your time-to-live:" {
 		if !permissionCheck(m) {
 			return
 		}
@@ -52,7 +52,7 @@ func messageHandler(m *tb.Message) {
 
 func onJoinHandler(m *tb.Message) {
 	_ = b.Notify(m.Chat, tb.Typing)
-	_, _ = b.Send(m.Chat, "You need to promote me to admin first.")
+	_, _ = b.Send(m.Chat, "You need to promote me to admin first. And then call /settings to set TTL")
 }
 
 func startHandler(m *tb.Message) {
