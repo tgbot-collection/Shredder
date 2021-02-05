@@ -52,19 +52,25 @@ func messageHandler(m *tb.Message) {
 
 func onJoinHandler(m *tb.Message) {
 	_ = b.Notify(m.Chat, tb.Typing)
-	_, _ = b.Send(m.Chat, "You need to promote me to admin first. And then call /settings to set TTL")
+	_, _ = b.Send(m.Chat, "You need to promote me to admin first. And then optionally call /settings to set TTL."+
+		"Default TTL is 48h.")
 }
 
 func startHandler(m *tb.Message) {
 	_ = b.Notify(m.Chat, tb.Typing)
-	_, _ = b.Send(m.Chat, "Welcome! I can help deleting group/channel messages. Please add me to your group as admin.")
+	_, _ = b.Send(m.Chat, "Welcome! I can help deleting group/channel messages. Please add me to your group as admin."+
+		"See /settings for more.")
 }
 
 func helpHandler(m *tb.Message) {
 	_ = b.Notify(m.Chat, tb.Typing)
 
+	helpMsg := `A bot that will help you automatically delete group messages.
+			You need to:
+			1. add me to a group/channel as admin.
+			2. optionally set TTL, default is 48h`
 	if m.Private() {
-		_, _ = b.Send(m.Chat, "Please add me to a group/channel as admin!")
+		_, _ = b.Send(m.Chat, helpMsg)
 		return
 	}
 
@@ -82,7 +88,7 @@ func helpHandler(m *tb.Message) {
 	if usable || m.Chat.Type == "channel" {
 		_, _ = b.Send(m.Chat, fmt.Sprintf("I'm working, your TTL is %dh", value))
 	} else {
-		_, _ = b.Send(m.Chat, "Please add me as admin!")
+		_, _ = b.Send(m.Chat, helpMsg)
 	}
 }
 
@@ -114,36 +120,39 @@ func settingsHandler(m *tb.Message) {
 }
 
 func permissionCheck(m *tb.Message) bool {
-	var isAdmin = false
+	var botAdmin = false
 	var senderAdmin = false
 	if m.Chat.Type == "channel" {
-		isAdmin = true
+		botAdmin = true
 		senderAdmin = true
 	} else {
 		admins, _ := b.AdminsOf(m.Chat)
-
+		var adminMap = make(map[int]int)
 		for _, admin := range admins {
-			switch admin.User.ID {
-			case m.Sender.ID:
-				senderAdmin = true
-			case b.Me.ID:
-				isAdmin = true
-			default:
-				isAdmin = false
-				senderAdmin = false
-			}
-
+			adminMap[admin.User.ID] = 1
 		}
-	}
-	//log.Infof("User %d on %s  permission is %v", m.Chat.ID, m.Chat.Type, canSubscribe)
 
-	if !(isAdmin && senderAdmin) {
-		// log.Warnf("Denied subscribe request for: %d", m.Sender.ID)
-		_ = b.Notify(m.Chat, tb.Typing)
-		_, _ = b.Send(m.Chat, "Are you admin? Please promote me as admin.")
-		return false
+		if _, ok := adminMap[m.Sender.ID]; ok {
+			senderAdmin = true
+		}
+		if _, ok := adminMap[b.Me.ID]; ok {
+			botAdmin = true
+		}
+
 	}
-	return true
+
+	_ = b.Notify(m.Chat, tb.Typing)
+
+	if !botAdmin {
+		_, _ = b.Send(m.Chat, "Please promote me to admin.")
+		return false
+	} else if !senderAdmin {
+		_, _ = b.Send(m.Chat, "Are you admin? ")
+		return false
+	} else {
+		return true
+	}
+
 }
 
 func readJSON() userConfig {

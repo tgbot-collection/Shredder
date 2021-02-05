@@ -15,7 +15,6 @@ import (
 func scheduler() {
 	keys := rdb.Keys(ctx, "*")
 	groupID, _ := keys.Result()
-	log.Infoln("Running delete scheduler")
 	for _, g := range groupID {
 		message, _ := rdb.HGetAll(ctx, g).Result()
 		for mid, ts := range message {
@@ -25,7 +24,7 @@ func scheduler() {
 			v := data[g]
 			if v == 0 {
 				log.Warningln("this group hasn't set TTL yet")
-				return
+				v = 48 * 3600
 			}
 			if time.Now().Unix()-int64(intts) > v {
 				log.Debugln("Deleting...")
