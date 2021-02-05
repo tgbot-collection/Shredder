@@ -51,18 +51,21 @@ func messageHandler(m *tb.Message) {
 }
 
 func onJoinHandler(m *tb.Message) {
+	rdb.HSet(ctx, fmt.Sprintf("%v", m.Chat.ID), m.ID, time.Now().Unix())
 	_ = b.Notify(m.Chat, tb.Typing)
 	_, _ = b.Send(m.Chat, "You need to promote me to admin first. And then optionally call /settings to set TTL."+
 		"Default TTL is 48h.")
 }
 
 func startHandler(m *tb.Message) {
+	rdb.HSet(ctx, fmt.Sprintf("%v", m.Chat.ID), m.ID, time.Now().Unix())
 	_ = b.Notify(m.Chat, tb.Typing)
 	_, _ = b.Send(m.Chat, "Welcome! I can help deleting group/channel messages. Please add me to your group as admin."+
 		"See /settings for more.")
 }
 
 func helpHandler(m *tb.Message) {
+	rdb.HSet(ctx, fmt.Sprintf("%v", m.Chat.ID), m.ID, time.Now().Unix())
 	_ = b.Notify(m.Chat, tb.Typing)
 
 	helpMsg := `A bot that will help you automatically delete group messages.
@@ -93,6 +96,7 @@ func helpHandler(m *tb.Message) {
 }
 
 func settingsHandler(m *tb.Message) {
+	rdb.HSet(ctx, fmt.Sprintf("%v", m.Chat.ID), m.ID, time.Now().Unix())
 	if !permissionCheck(m) {
 		return
 	}
