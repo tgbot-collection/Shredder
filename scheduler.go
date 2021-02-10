@@ -16,6 +16,7 @@ func scheduler() {
 	keys := rdb.Keys(ctx, "*")
 	groupID, _ := keys.Result()
 	for _, g := range groupID {
+		log.Infoln("Running delete...")
 		message, _ := rdb.HGetAll(ctx, g).Result()
 		for mid, ts := range message {
 			intts, _ := strconv.Atoi(ts)
